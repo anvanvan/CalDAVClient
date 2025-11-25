@@ -250,32 +250,42 @@ final class GetCalendarResponse extends ETagEntityResponse
     }
 
     /**
-     * Expand recurring events while preserving RRULE on instances
+     * Expand recurring events while preserving RRULE and DTSTART on instances
      *
-     * Sabre's expand() consumes RRULE during expansion. This method
-     * captures RRULE before expansion and attaches it to each instance
-     * as X-MASTER-RRULE property for frontend display.
+     * Sabre's expand() consumes RRULE during expansion and replaces DTSTART
+     * with the occurrence date. This method captures both properties before
+     * expansion and attaches them to each instance as X-MASTER-* properties
+     * for frontend display and series editing.
      *
      * @param \Sabre\VObject\Component\VCalendar $vcalendar
      * @param \DateTime $start
      * @param \DateTime $end
-     * @return \Sabre\VObject\Component\VCalendar Expanded calendar with preserved RRULE
+     * @return \Sabre\VObject\Component\VCalendar Expanded calendar with preserved master properties
      */
     public static function expandWithRRulePreservation($vcalendar, $start, $end)
     {
-        // Capture RRULE from master event BEFORE expansion
+        // Capture RRULE and DTSTART from master event BEFORE expansion
         $masterRRule = null;
-        if (isset($vcalendar->VEVENT) && isset($vcalendar->VEVENT->RRULE)) {
-            $masterRRule = (string)$vcalendar->VEVENT->RRULE;
+        $masterDTSTART = null;
+        if (isset($vcalendar->VEVENT)) {
+            if (isset($vcalendar->VEVENT->RRULE)) {
+                $masterRRule = (string)$vcalendar->VEVENT->RRULE;
+            }
+            if (isset($vcalendar->VEVENT->DTSTART)) {
+                $masterDTSTART = (string)$vcalendar->VEVENT->DTSTART;
+            }
         }
 
         // Expand events
         $expanded = $vcalendar->expand($start, $end);
 
-        // Attach RRULE to each expanded instance
-        if ($masterRRule !== null) {
-            foreach ($expanded->VEVENT as $vevent) {
+        // Attach master properties to each expanded instance
+        foreach ($expanded->VEVENT as $vevent) {
+            if ($masterRRule !== null) {
                 $vevent->add('X-MASTER-RRULE', $masterRRule);
+            }
+            if ($masterDTSTART !== null) {
+                $vevent->add('X-MASTER-DTSTART', $masterDTSTART);
             }
         }
 
