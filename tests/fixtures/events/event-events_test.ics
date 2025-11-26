@@ -1,8 +1,4 @@
-Array
-(
-    [0] => CalDAVClient\Facade\Responses\VCardEntityResponse Object
-        (
-            [vcard:protected] => BEGIN:VCALENDAR
+BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Apple Inc.//Mac OS X 10.15.7//EN
 CALSCALE:GREGORIAN
@@ -16,5 +12,3 @@ DTSTAMP:20250113T000000Z
 LAST-MODIFIED:20250113T000000Z
 END:VEVENT
 END:VCALENDAR
-        )
-)
