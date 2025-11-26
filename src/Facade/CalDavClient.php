@@ -24,6 +24,7 @@ use CalDAVClient\Facade\Responses\CalendarHomesResponse;
 use CalDAVClient\Facade\Responses\CalendarSyncInfoResponse;
 use CalDAVClient\Facade\Responses\EventCreatedResponse;
 use CalDAVClient\Facade\Responses\EventDeletedResponse;
+use CalDAVClient\Facade\Responses\EventMovedResponse;
 use CalDAVClient\Facade\Responses\EventUpdatedResponse;
 use CalDAVClient\Facade\Responses\GetCalendarResponse;
 use CalDAVClient\Facade\Responses\GetCalendarsResponse;
@@ -493,6 +494,39 @@ final class CalDavClient implements ICalDavClient
         return new EventDeletedResponse
         (
             (string)$http_response->getBody(), $http_response->getStatusCode()
+        );
+    }
+
+    /**
+     * Move an event from one calendar to another using WebDAV MOVE
+     *
+     * @param string $source_calendar_url Source calendar URL
+     * @param string $destination_calendar_url Destination calendar URL
+     * @param string $uid Event UID
+     * @param string|null $etag Optional ETag for conditional move
+     * @return EventMovedResponse
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function moveEvent($source_calendar_url, $destination_calendar_url, $uid, $etag = null)
+    {
+        $source_url = $source_calendar_url . $uid . self::SchedulingInformationSuffix;
+        $destination_url = $destination_calendar_url . $uid . self::SchedulingInformationSuffix;
+
+        $http_response = $this->makeRequest(
+            RequestFactory::createMoveRequest(
+                $source_url,
+                $destination_url,
+                $etag
+            )
+        );
+
+        $new_etag = $http_response->hasHeader(self::ETagHeader) ? $http_response->getHeaderLine(self::ETagHeader) : null;
+        return new EventMovedResponse(
+            $uid,
+            $new_etag,
+            $destination_url,
+            (string)$http_response->getBody(),
+            $http_response->getStatusCode()
         );
     }
 

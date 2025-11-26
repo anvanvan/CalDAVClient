@@ -28,4 +28,5 @@ final class HttpMethods
     const MakeCalendar = 'MKCALENDAR';
     const Delete       = 'DELETE';
     const Options      = 'OPTIONS';
+    const Move         = 'MOVE';
 }

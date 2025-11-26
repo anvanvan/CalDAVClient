@@ -1,4 +1,4 @@
-<?php namespace CalDAVClient\Facade\Utils;
+<?php namespace CalDAVClient\Facade\Responses;
 /**
  * Copyright 2017 OpenStack Foundation
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,17 +13,17 @@
  **/
 
 /**
- * Class Headers
- * @package CalDAVClient\Facade\Utils
+ * Class EventMovedResponse
+ * @package CalDAVClient\Facade\Responses
  */
-final class Headers
+final class EventMovedResponse extends EventCreatedResponse
 {
-    const Depth         = 'Depth';
-    const Prefer        = 'Prefer';
-    const ContentType   = 'Content-Type';
-    const ContentLength = 'Content-Length';
-    const IfMatch       = 'If-Match';
-    const IfNotMatch    = 'If-None-Match"';
-    const Destination   = 'Destination';
-    const Overwrite     = 'Overwrite';
+    /**
+     * @return bool
+     */
+    public function isSuccessFull(){
+        // WebDAV MOVE returns 201 Created when resource is moved to new location
+        // or 204 No Content when moved within same collection
+        return $this->code == HttpResponse::HttpCodeCreated || $this->code == HttpResponse::HttpCodeNoContent;
+    }
 }

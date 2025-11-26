@@ -63,6 +63,20 @@ final class RequestFactory
                }
 
                return $headers;
+            case HttpMethods::Move:
+                $destination = $params[0];
+                $etag = $params[1] ?? null;
+
+                $headers = [
+                    Headers::Destination => $destination,
+                    Headers::Overwrite   => 'F',
+                ];
+
+                if(!empty($etag)){
+                    $headers[Headers::IfMatch] = $etag;
+                }
+
+                return $headers;
         }
         return [];
     }
@@ -184,6 +198,21 @@ final class RequestFactory
             $url,
             self::createHeadersFor(HttpMethods::Post, [$etag]),
             $body
+        );
+    }
+
+    /**
+     * @param string $source_url
+     * @param string $destination_url
+     * @param string|null $etag
+     * @return Request
+     */
+    public static function createMoveRequest($source_url, $destination_url, $etag = null){
+        return new Request
+        (
+            HttpMethods::Move,
+            $source_url,
+            self::createHeadersFor(HttpMethods::Move, [$destination_url, $etag])
         );
     }
 
