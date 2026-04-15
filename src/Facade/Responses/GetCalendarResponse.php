@@ -257,6 +257,11 @@ final class GetCalendarResponse extends ETagEntityResponse
      * expansion and attaches them to each instance as X-MASTER-* properties
      * for frontend display and series editing.
      *
+     * If the expansion returns no occurrences (e.g., the RRULE has no instances
+     * in the requested date range), the returned VCalendar will have a null VEVENT
+     * property. This method safely handles that case and returns the expanded
+     * calendar unchanged.
+     *
      * @param \Sabre\VObject\Component\VCalendar $vcalendar
      * @param \DateTime $start
      * @param \DateTime $end
@@ -279,8 +284,9 @@ final class GetCalendarResponse extends ETagEntityResponse
         // Expand events
         $expanded = $vcalendar->expand($start, $end);
 
-        // Attach master properties to each expanded instance
-        foreach ($expanded->VEVENT as $vevent) {
+        // Attach master properties to each expanded instance (if any exist)
+        // Note: $expanded->VEVENT may be null if no occurrences fall in the date range
+        foreach ($expanded->VEVENT ?? [] as $vevent) {
             if ($masterRRule !== null) {
                 $vevent->add('X-MASTER-RRULE', $masterRRule);
             }
